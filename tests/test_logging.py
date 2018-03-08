@@ -39,5 +39,5 @@ log_levels = [
 ]
 @pytest.mark.parametrize("given,expected", log_levels)
 def test_get_logger_log_levels(given, expected):
-    logger = cdislogging.get_logger('test_get_logger_log_levels', log_level=given)
+    logger = cdislogging.get_logger('test_get_logger_log_levels' + given, log_level=given)
     assert logger.getEffectiveLevel() == expected
