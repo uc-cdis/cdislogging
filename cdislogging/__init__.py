@@ -81,7 +81,7 @@ def get_logger(logger_name, file_name=None, log_level='debug'):
     # instantiated with the same name before. Do not keep creating handlers
     # or your logs will be very messy.
     if logger.handlers:
-        return logger.handlers[0]
+        return logger
 
     logger.setLevel(log_levels[log_level])
     logger.addHandler(get_stream_handler())
