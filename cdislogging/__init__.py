@@ -71,12 +71,19 @@ def get_logger(logger_name, file_name=None, log_level='debug'):
 
     if log_level not in log_levels:
         error_message = 'Invalid log_level parameter: {}\n\n' \
-                        'Valid options: debug, info, warning, warn, error'.format(log_level)
+                        'Valid options: debug, info, warning, ' \
+                        'warn, error'.format(log_level)
         raise Exception(error_message)
 
     logger = logging.getLogger(logger_name)
-    logger.setLevel(log_levels[log_level])
 
+    # If at least one log handler exists that means it has been
+    # instantiated with the same name before. Do not keep creating handlers
+    # or your logs will be very messy.
+    if logger.handlers:
+        return logger.handlers[0]
+
+    logger.setLevel(log_levels[log_level])
     logger.addHandler(get_stream_handler())
 
     if file_name:
