@@ -1,11 +1,14 @@
 language: python
+dist: xenial
 
 python:
   - 2.7
   - 3.5
+  - 3.6
+  - 3.7
 
 install:
-  - python setup.py install
-  - pip install -r dev-requirements.txt
+  - pip install pipenv
+  - pipenv install --dev
 
-script: "py.test -v"
+script: "pipenv run py.test -v"
