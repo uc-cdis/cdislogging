@@ -7,12 +7,17 @@ python:
 - 3.7
 install:
 - pip install pipenv
-- pipenv install --dev
+- pipenv install --dev --deploy
 script: pipenv run py.test -v
+before_deploy:
+- sed -i.bak "s/=get_version()/='$TRAVIS_TAG'/g" setup.py
+- cat setup.py
+- if [ $(python setup.py --version) == '0.0.0' ]; then travis_terminate 1; fi
 deploy:
   provider: pypi
   user: uc-ctds
   skip_existing: true
+  skip_cleanup: true
   on:
     tags: true
   password:
