@@ -43,9 +43,9 @@ def test_get_logger_log_levels(given, expected):
     assert logger.getEffectiveLevel() == expected
 
 def test_multiple_log_handlers():
-    logger = cdislogging.get_logger('one_handler')
+    logger = cdislogging.get_logger('one_handler', log_level='debug')
     assert len(logger.handlers) == 1
 
     # make sure it only has one handler associated with the logger name
-    logger = cdislogging.get_logger('one_handler')
+    logger = cdislogging.get_logger('one_handler', log_level='debug')
     assert len(logger.handlers) == 1
