@@ -83,8 +83,10 @@ def get_logger(logger_name, file_name=None, log_level=None):
             raise Exception(error_message)
 
         logger.setLevel(log_levels[log_level])
-        logger.propagate = False
     # Else if log_level is None then by default propagate=True and level=NOTSET
+
+    # TODO lol
+    logger.propagate = False
 
     if not logger.handlers:
         logger.addHandler(get_stream_handler())
