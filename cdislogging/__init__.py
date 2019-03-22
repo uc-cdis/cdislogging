@@ -71,31 +71,28 @@ def get_logger(logger_name, file_name=None, log_level=None):
         'error': logging.ERROR,     # 40
     }
 
-    if log_level is None:
-        # TODO explain
-        # This has propagate=True and level=NOTSET
-        return logging.getLogger(logger_name)
-
-    if log_level not in log_levels:
-        error_message = 'Invalid log_level parameter: {}\n\n' \
-                        'Valid options: debug, info, warning, ' \
-                        'warn, error'.format(log_level)
-        raise Exception(error_message)
-
     logger = logging.getLogger(logger_name)
 
-    logger.setLevel(log_levels[log_level])
-    logger.propagate = False
+    # TODO: Explain
 
-    # If at least one log handler exists that means it has been
+    if log_level:
+        if log_level not in log_levels:
+            error_message = 'Invalid log_level parameter: {}\n\n' \
+                            'Valid options: debug, info, warning, ' \
+                            'warn, error'.format(log_level)
+            raise Exception(error_message)
+
+        logger.setLevel(log_levels[log_level])
+        logger.propagate = False
+    # Else if log_level is None then by default propagate=True and level=NOTSET
+
+    if not logger.handlers:
+        logger.addHandler(get_stream_handler())
+
+        if file_name:
+            logger.addHandler(get_file_handler(file_name))
+    # Else if at least one log handler exists that means it has been
     # instantiated with the same name before. Do not keep creating handlers
     # or your logs will be very messy.
-    if logger.handlers:
-        return logger
-
-    logger.addHandler(get_stream_handler())
-
-    if file_name:
-        logger.addHandler(get_file_handler(file_name))
 
     return logger
