@@ -38,7 +38,9 @@ def get_file_handler(file_name):
 
     return handler
 
-def get_logger(logger_name, file_name=None, log_level='debug'):
+# TODO explain
+#def get_logger(logger_name, file_name=None, log_level='debug'):
+def get_logger(logger_name, file_name=None, log_level=None):
     """Return an opinionated basic logger named `name` that logs to stdout
 
     If you change the log level to something other than debug then it will not
@@ -69,6 +71,11 @@ def get_logger(logger_name, file_name=None, log_level='debug'):
         'error': logging.ERROR,     # 40
     }
 
+    if log_level is None:
+        # TODO explain
+        # This has propagate=True and level=NOTSET
+        return logging.getLogger(logger_name)
+
     if log_level not in log_levels:
         error_message = 'Invalid log_level parameter: {}\n\n' \
                         'Valid options: debug, info, warning, ' \
@@ -77,17 +84,18 @@ def get_logger(logger_name, file_name=None, log_level='debug'):
 
     logger = logging.getLogger(logger_name)
 
+    logger.setLevel(log_levels[log_level])
+    logger.propagate = False
+
     # If at least one log handler exists that means it has been
     # instantiated with the same name before. Do not keep creating handlers
     # or your logs will be very messy.
     if logger.handlers:
         return logger
 
-    logger.setLevel(log_levels[log_level])
     logger.addHandler(get_stream_handler())
 
     if file_name:
         logger.addHandler(get_file_handler(file_name))
 
-    logger.propagate = False
     return logger
