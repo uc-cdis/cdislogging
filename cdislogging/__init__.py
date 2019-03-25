@@ -87,11 +87,9 @@ def get_logger(logger_name, file_name=None, log_level=None):
         logger.setLevel(log_levels[log_level])
     # Else, NOTSET is Python default.
 
-    # If propagate is true then all ancestor handlers are invoked
-    # regardless of log_level or filters
-    logger.propagate = False
+    logger.propagate = logger.level == logging.NOTSET
 
-    if log_level and not logger.handlers:
+    if logger.level != logging.NOTSET and not logger.handlers:
         logger.addHandler(get_stream_handler())
 
         if file_name:
@@ -99,5 +97,9 @@ def get_logger(logger_name, file_name=None, log_level=None):
     # Else if at least one log handler exists that means it has been
     # instantiated with the same name before. Do not keep creating handlers
     # or your logs will be very messy.
+    if logger.level == logging.NOTSET:
+        # Delete handlers in case level was set back to NOTSET
+        # after being set to something else
+        del logger.handlers[:]
 
     return logger
