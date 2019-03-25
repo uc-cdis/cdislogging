@@ -67,44 +67,44 @@ def test_inheritance():
     assert child.propagate == True
     assert len(child.handlers) == 0
 
-    mock_parent_hdlr = MagicMock()
-    parent.handlers[0].emit = mock_parent_hdlr
+    mock_parent_hdlr_emit = MagicMock()
+    parent.handlers[0].emit = mock_parent_hdlr_emit
 
-    child.info("Should emit")
-    assert mock_parent_hdlr.call_count == 1
-    child.debug("Should not emit")
-    assert mock_parent_hdlr.call_count == 1
+    child.info("Should emit via parent")
+    assert mock_parent_hdlr_emit.call_count == 1
+    child.debug("Should not emit since parent level is info and child level is notset")
+    assert mock_parent_hdlr_emit.call_count == 1
 
     parent = cdislogging.get_logger('parent', log_level='debug')
 
-    child.info("Should emit")
-    assert mock_parent_hdlr.call_count == 2
-    child.debug("Should emit")
-    assert mock_parent_hdlr.call_count == 3
+    child.info("Should emit via parent")
+    assert mock_parent_hdlr_emit.call_count == 2
+    child.debug("Should emit via parent since parent level changed to debug and child level is notset")
+    assert mock_parent_hdlr_emit.call_count == 3
 
     child = cdislogging.get_logger('parent.child', log_level='warn')
     assert child.propagate == False
     assert len(child.handlers) == 1
 
-    mock_child_hdlr = MagicMock()
-    child.handlers[0].emit = mock_child_hdlr
+    mock_child_hdlr_emit = MagicMock()
+    child.handlers[0].emit = mock_child_hdlr_emit
 
-    parent.warn("Should emit with parent hdlr")
-    assert mock_parent_hdlr.call_count == 4
-    assert mock_child_hdlr.call_count == 0
+    parent.warn("Should emit with parent hdlr since this is the parent")
+    assert mock_parent_hdlr_emit.call_count == 4
+    assert mock_child_hdlr_emit.call_count == 0
 
-    child.info("Should not emit at all")
-    assert mock_parent_hdlr.call_count == 4
-    assert mock_child_hdlr.call_count == 0
+    child.info("Should not emit at all since child level is now warn")
+    assert mock_parent_hdlr_emit.call_count == 4
+    assert mock_child_hdlr_emit.call_count == 0
 
-    child.warn("Should emit with child hdlr only")
-    assert mock_parent_hdlr.call_count == 4
-    assert mock_child_hdlr.call_count == 1
+    child.warn("Should emit with child hdlr only since child level was set; no longer inherits")
+    assert mock_parent_hdlr_emit.call_count == 4
+    assert mock_child_hdlr_emit.call_count == 1
 
     child = cdislogging.get_logger('parent.child', log_level='notset')
     assert child.propagate == True
     assert len(child.handlers) == 0
 
-    child.info("Should emit with parent hdlr only")
-    assert mock_parent_hdlr.call_count == 5
-    assert mock_child_hdlr.call_count == 1
+    child.info("Should emit with parent hdlr only since level was reset to notset")
+    assert mock_parent_hdlr_emit.call_count == 5
+    assert mock_child_hdlr_emit.call_count == 1
