@@ -38,12 +38,15 @@ def get_file_handler(file_name):
 
     return handler
 
-# TODO explain
-#def get_logger(logger_name, file_name=None, log_level='debug'):
 def get_logger(logger_name, file_name=None, log_level=None):
     """Return an opinionated basic logger named `name` that logs to stdout
 
-    If you change the log level to something other than debug then it will not
+    If you leave the log level argument as None, the level will be set to NOTSET.
+
+    If the level is NOTSET, then ancestor loggers are traversed and searched
+    for a log_level and handler. See python docs.
+
+    If you change the log level to something other than debug (or notset) then it will not
     display log statements below that level (see example and chart below for details).
     Ideally this should be handled by your application's command line args.
 
@@ -64,6 +67,7 @@ def get_logger(logger_name, file_name=None, log_level=None):
     """
 
     log_levels = {                  # sorted level
+        'notset': logging.NOTSET,   # 00
         'debug': logging.DEBUG,     # 10
         'info': logging.INFO,       # 20
         'warning': logging.WARNING, # 30
@@ -73,8 +77,6 @@ def get_logger(logger_name, file_name=None, log_level=None):
 
     logger = logging.getLogger(logger_name)
 
-    # TODO: Explain
-
     if log_level:
         if log_level not in log_levels:
             error_message = 'Invalid log_level parameter: {}\n\n' \
@@ -83,9 +85,10 @@ def get_logger(logger_name, file_name=None, log_level=None):
             raise Exception(error_message)
 
         logger.setLevel(log_levels[log_level])
-    # Else if log_level is None then by default propagate=True and level=NOTSET
+    # Else, NOTSET is Python default.
 
-    # TODO lol
+    # If propagate is true then all ancestor handlers are invoked
+    # regardless of log_level or filters
     logger.propagate = False
 
     if not logger.handlers:
