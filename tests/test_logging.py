@@ -101,6 +101,14 @@ def test_inheritance():
     assert mock_parent_hdlr_emit.call_count == 4
     assert mock_child_hdlr_emit.call_count == 1
 
+    # Check that calling get_logger again with no log_level arg after logger was instantiated
+    # does _not_ reset the log level to NOTSET
+    child = cdislogging.get_logger('parent.child')
+    # Parent level is debug, child level is warn:
+    child.debug("Should not emit, but will emit if child level was reset to notset")
+    assert mock_parent_hdlr_emit.call_count == 4
+    assert mock_child_hdlr_emit.call_count == 1
+
     child = cdislogging.get_logger('parent.child', log_level='notset')
     assert child.propagate == True
     assert len(child.handlers) == 0

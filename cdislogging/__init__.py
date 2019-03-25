@@ -41,7 +41,9 @@ def get_file_handler(file_name):
 def get_logger(logger_name, file_name=None, log_level=None):
     """Return an opinionated basic logger named `name` that logs to stdout
 
-    If you leave the log level argument as None, the level will be set to NOTSET.
+    If you leave the log level argument as None and the logger was not
+    previously instantiated, the level will be set to NOTSET. If the logger
+    was previously instantiated, the level will be left alone.
 
     If the level is NOTSET, then ancestor loggers are traversed and searched
     for a log_level and handler. See python docs.
