@@ -91,7 +91,7 @@ def get_logger(logger_name, file_name=None, log_level=None):
     # regardless of log_level or filters
     logger.propagate = False
 
-    if not logger.handlers:
+    if log_level and not logger.handlers:
         logger.addHandler(get_stream_handler())
 
         if file_name:
