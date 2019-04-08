@@ -22,7 +22,7 @@ import cdislogging
 @pytest.fixture(autouse=True)
 def delete_loggers():
     """Delete loggers since python logging tries to reuse them"""
-    keys = logging.Logger.manager.loggerDict.keys()
+    keys = list(logging.Logger.manager.loggerDict.keys())
     for k in keys:
         # Deletes logger object and dict item
         del logging.Logger.manager.loggerDict[k]
