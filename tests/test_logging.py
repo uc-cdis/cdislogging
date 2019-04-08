@@ -19,6 +19,15 @@ except ImportError:
 import cdislogging
 
 
+@pytest.fixture(autouse=True)
+def delete_loggers():
+    """Delete loggers since python logging tries to reuse them"""
+    keys = logging.Logger.manager.loggerDict.keys()
+    for k in keys:
+        # Deletes logger object and dict item
+        del logging.Logger.manager.loggerDict[k]
+
+
 def test_get_stream_handler():
     handler = cdislogging.get_stream_handler()
     assert handler.formatter._fmt == cdislogging.FORMAT
@@ -75,17 +84,16 @@ def test_instantiate_with_log_level():
     assert len(logger.handlers) == 1
 
 
-#def test_instantiate_without_log_level():
-#    """
-#    Check that if logger instantiated without log_level arg
-#    then level and propagate are set correctly and no handlers created
-#    """
-#    # TODO: Shoot, this thing gets the logger from the previous test hahaha
-#    logger = cdislogging.get_logger('logger')
-#    assert logger.level == logging.NOTSET
-#    assert logger.propagate == True
-#    assert len(logger.handlers) == 0
-#
+def test_instantiate_without_log_level():
+    """
+    Check that if logger instantiated without log_level arg
+    then level and propagate are set correctly and no handlers created
+    """
+    logger = cdislogging.get_logger('logger')
+    assert logger.level == logging.NOTSET
+    assert logger.propagate == True
+    assert len(logger.handlers) == 0
+
 
 def test_log_level():
     """
