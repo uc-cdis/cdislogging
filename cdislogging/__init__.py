@@ -38,10 +38,17 @@ def get_file_handler(file_name):
 
     return handler
 
-def get_logger(logger_name, file_name=None, log_level='debug'):
+def get_logger(logger_name, file_name=None, log_level=None):
     """Return an opinionated basic logger named `name` that logs to stdout
 
-    If you change the log level to something other than debug then it will not
+    If you leave the log level argument as None and the logger was not
+    previously instantiated, the level will be set to NOTSET. If the logger
+    was previously instantiated, the level will be left alone.
+
+    If the level is NOTSET, then ancestor loggers are traversed and searched
+    for a log_level and handler. See python docs.
+
+    If you change the log level to something other than debug (or notset) then it will not
     display log statements below that level (see example and chart below for details).
     Ideally this should be handled by your application's command line args.
 
@@ -62,6 +69,7 @@ def get_logger(logger_name, file_name=None, log_level='debug'):
     """
 
     log_levels = {                  # sorted level
+        'notset': logging.NOTSET,   # 00
         'debug': logging.DEBUG,     # 10
         'info': logging.INFO,       # 20
         'warning': logging.WARNING, # 30
@@ -69,25 +77,31 @@ def get_logger(logger_name, file_name=None, log_level='debug'):
         'error': logging.ERROR,     # 40
     }
 
-    if log_level not in log_levels:
-        error_message = 'Invalid log_level parameter: {}\n\n' \
-                        'Valid options: debug, info, warning, ' \
-                        'warn, error'.format(log_level)
-        raise Exception(error_message)
-
     logger = logging.getLogger(logger_name)
 
-    # If at least one log handler exists that means it has been
+    if log_level:
+        if log_level not in log_levels:
+            error_message = 'Invalid log_level parameter: {}\n\n' \
+                            'Valid options: debug, info, warning, ' \
+                            'warn, error'.format(log_level)
+            raise Exception(error_message)
+
+        logger.setLevel(log_levels[log_level])
+    # Else, NOTSET is Python default.
+
+    logger.propagate = logger.level == logging.NOTSET
+
+    if logger.level != logging.NOTSET and not logger.handlers:
+        logger.addHandler(get_stream_handler())
+
+        if file_name:
+            logger.addHandler(get_file_handler(file_name))
+    # Else if at least one log handler exists that means it has been
     # instantiated with the same name before. Do not keep creating handlers
     # or your logs will be very messy.
-    if logger.handlers:
-        return logger
+    if logger.level == logging.NOTSET:
+        # Delete handlers in case level was set back to NOTSET
+        # after being set to something else
+        del logger.handlers[:]
 
-    logger.setLevel(log_levels[log_level])
-    logger.addHandler(get_stream_handler())
-
-    if file_name:
-        logger.addHandler(get_file_handler(file_name))
-
-    logger.propagate = False
     return logger
