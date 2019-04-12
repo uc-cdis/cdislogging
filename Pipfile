@@ -5,7 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
+mock = {version = "*",markers = "python_version<'3.0'"}
 
 [packages]
-cdislogging = {editable = true,path = "."}
-
+cdislogging = {path = ".",editable = true}
