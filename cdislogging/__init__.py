@@ -7,7 +7,7 @@ import logging
 import sys
 
 
-FORMAT = '[%(asctime)s][%(name)10s][%(levelname)7s] %(message)s'
+FORMAT = '[%(asctime)s][%(name)s][%(levelname)s] %(message)s'
 
 def get_stream_handler():
     """Return a stdout stream handler
