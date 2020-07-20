@@ -38,6 +38,15 @@ Optional parameters:
 * log_level (default: 'debug') - Change the log level
 
     
+<!--ts-->
+   * [cdislogging](#cdislogging)
+      * [Basic usage:](#basic-usage)
+      * [Optional parameters:](#optional-parameters)
+      * [Setup pre-commit hook to check for secrets](#setup-pre-commit-hook-to-check-for-secrets)
+
+<!-- Added by: qiaoqiao, at: Mon Jul 20 16:19:58 CDT 2020 -->
+
+<!--te-->
 ## Setup pre-commit hook to check for secrets
 
 We use [pre-commit](https://pre-commit.com/) to setup pre-commit hooks for this repo.
