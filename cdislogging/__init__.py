@@ -7,7 +7,8 @@ import logging
 import sys
 
 
-FORMAT = '[%(asctime)s][%(name)10s][%(levelname)7s] %(message)s'
+FORMAT = "[%(asctime)s][%(name)10s][%(levelname)7s] %(message)s"
+
 
 def get_stream_handler():
     """Return a stdout stream handler
@@ -23,6 +24,7 @@ def get_stream_handler():
 
     return handler
 
+
 def get_file_handler(file_name):
     """Return a file handler
 
@@ -37,6 +39,7 @@ def get_file_handler(file_name):
     handler.setFormatter(logging.Formatter(FORMAT))
 
     return handler
+
 
 def get_logger(logger_name, file_name=None, log_level=None):
     """Return an opinionated basic logger named `name` that logs to stdout
@@ -68,22 +71,24 @@ def get_logger(logger_name, file_name=None, log_level=None):
         logging.Logger: pre-formatted logger object
     """
 
-    log_levels = {                  # sorted level
-        'notset': logging.NOTSET,   # 00
-        'debug': logging.DEBUG,     # 10
-        'info': logging.INFO,       # 20
-        'warning': logging.WARNING, # 30
-        'warn': logging.WARNING,    # 30
-        'error': logging.ERROR,     # 40
+    log_levels = {  # sorted level
+        "notset": logging.NOTSET,  # 00
+        "debug": logging.DEBUG,  # 10
+        "info": logging.INFO,  # 20
+        "warning": logging.WARNING,  # 30
+        "warn": logging.WARNING,  # 30
+        "error": logging.ERROR,  # 40
     }
 
     logger = logging.getLogger(logger_name)
 
     if log_level:
         if log_level not in log_levels:
-            error_message = 'Invalid log_level parameter: {}\n\n' \
-                            'Valid options: debug, info, warning, ' \
-                            'warn, error'.format(log_level)
+            error_message = (
+                "Invalid log_level parameter: {}\n\n"
+                "Valid options: debug, info, warning, "
+                "warn, error".format(log_level)
+            )
             raise Exception(error_message)
 
         logger.setLevel(log_levels[log_level])
