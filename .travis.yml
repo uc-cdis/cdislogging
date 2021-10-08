@@ -1,7 +1,6 @@
 language: python
 dist: xenial
 python:
-- 2.7
 - 3.5
 - 3.6
 - 3.7
@@ -20,7 +19,7 @@ deploy:
   skip_existing: true
   skip_cleanup: true
   on:
-    python: 2.7
+    python: 3.6
     repo: uc-cdis/cdislogging
     tags: true
   password:
