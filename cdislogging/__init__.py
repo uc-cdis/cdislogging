@@ -10,7 +10,7 @@ import sys
 FORMAT = "[%(asctime)s][%(name)10s][%(levelname)7s] %(message)s"
 
 
-def get_stream_handler():
+def get_stream_handler(format=FORMAT):
     """Return a stdout stream handler
 
     All logs will write to stdout.
@@ -20,12 +20,12 @@ def get_stream_handler():
     """
 
     handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(logging.Formatter(FORMAT))
+    handler.setFormatter(logging.Formatter(format))
 
     return handler
 
 
-def get_file_handler(file_name):
+def get_file_handler(file_name, format=FORMAT):
     """Return a file handler
 
     Args:
@@ -36,12 +36,12 @@ def get_file_handler(file_name):
     """
 
     handler = logging.FileHandler(file_name)
-    handler.setFormatter(logging.Formatter(FORMAT))
+    handler.setFormatter(logging.Formatter(format))
 
     return handler
 
 
-def get_logger(logger_name, file_name=None, log_level=None):
+def get_logger(logger_name, file_name=None, log_level=None, format=FORMAT):
     """Return an opinionated basic logger named `name` that logs to stdout
 
     If you leave the log level argument as None and the logger was not
@@ -97,10 +97,10 @@ def get_logger(logger_name, file_name=None, log_level=None):
     logger.propagate = logger.level == logging.NOTSET
 
     if logger.level != logging.NOTSET and not logger.handlers:
-        logger.addHandler(get_stream_handler())
+        logger.addHandler(get_stream_handler(format=format))
 
         if file_name:
-            logger.addHandler(get_file_handler(file_name))
+            logger.addHandler(get_file_handler(file_name, format=format))
     # Else if at least one log handler exists that means it has been
     # instantiated with the same name before. Do not keep creating handlers
     # or your logs will be very messy.
