@@ -4,7 +4,7 @@ import logging
 import os
 from unittest.mock import MagicMock
 
-import pytest
+import pytest  # noqa: E0401
 
 import cdislogging
 
@@ -21,14 +21,18 @@ def delete_loggers():
 def test_get_stream_handler():
     """Test get_stream_handler"""
     handler = cdislogging.get_stream_handler()
-    assert handler.formatter._fmt == cdislogging.FORMAT
+    assert (
+        handler.formatter._fmt == cdislogging.FORMAT
+    )  # pylint: disable=protected-access
 
 
 def test_get_file_handler():
     """Test get_file_handler"""
     file_name = "FAKE-LOGGER.TXT"
     handler = cdislogging.get_file_handler(file_name)
-    assert handler.formatter._fmt == cdislogging.FORMAT
+    assert (
+        handler.formatter._fmt == cdislogging.FORMAT
+    )  # pylint: disable=protected-access
     assert os.path.basename(handler.stream.name) == file_name
     assert os.path.exists(file_name)
 
@@ -168,7 +172,6 @@ def test_child_change_level_from_notset_updates_properties():
     the child logger correctly updates level and propagate,
     and gets its own handler
     """
-    parent = cdislogging.get_logger("parent", log_level="info")
     child = cdislogging.get_logger("parent.child")
     assert child.propagate is True
     assert len(child.handlers) == 0
