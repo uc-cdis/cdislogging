@@ -2,6 +2,7 @@
 name = "cdislogging"
 version = "1.1.2"
 description = "Logging routines with centralized format"
+authors = ["CTDS UChicago <cdis@uchicago.edu>"]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/uc-cdis/cdislogging"
