@@ -6,7 +6,6 @@ Logging with a standardized format
 import logging
 import sys
 
-
 FORMAT = "[%(asctime)s][%(name)10s][%(levelname)7s] %(message)s"
 
 
@@ -25,7 +24,7 @@ def get_stream_handler(format=FORMAT):
     return handler
 
 
-def get_file_handler(file_name, format=FORMAT):
+def get_file_handler(file_name: str, format=FORMAT):
     """Return a file handler
 
     Args:
