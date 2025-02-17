@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "cdislogging"
+version = "1.1.2"
+description = "Logging routines with centralized format"
+authors = ["Center for Translational Data Science at the University of Chicago <support@gen3.org>"]
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/uc-cdis/cdislogging"
+include = [
+  "NOTICE",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+
+[tool.poetry.group.dev.dependencies]
+mock = "*"
+pytest = "*"
+pytest-cov = "^2.5.1"
+isort = ">=5.12.0"
+pylint = ">=3.0.1"
+black = ">=23.10.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

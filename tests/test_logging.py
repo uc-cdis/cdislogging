@@ -1,20 +1,10 @@
-"""tests/test_logging.py
+"""Basic set of tests for logging"""
 
-Basic set of tests for logging
-"""
-
-import os
 import logging
+import os
+from unittest.mock import MagicMock
 
-import pytest
-
-# Python 2 and 3 compatible
-try:
-    from unittest.mock import MagicMock
-    from unittest.mock import patch
-except ImportError:
-    from mock import MagicMock
-    from mock import patch
+import pytest  # pylint: disable=E0401
 
 import cdislogging
 
@@ -29,14 +19,20 @@ def delete_loggers():
 
 
 def test_get_stream_handler():
+    """Test get_stream_handler"""
     handler = cdislogging.get_stream_handler()
-    assert handler.formatter._fmt == cdislogging.FORMAT
+    assert (
+        handler.formatter._fmt == cdislogging.FORMAT  # pylint: disable=protected-access
+    )
 
 
 def test_get_file_handler():
+    """Test get_file_handler"""
     file_name = "FAKE-LOGGER.TXT"
     handler = cdislogging.get_file_handler(file_name)
-    assert handler.formatter._fmt == cdislogging.FORMAT
+    assert (
+        handler.formatter._fmt == cdislogging.FORMAT  # pylint: disable=protected-access
+    )
     assert os.path.basename(handler.stream.name) == file_name
     assert os.path.exists(file_name)
 
@@ -46,6 +42,7 @@ def test_get_file_handler():
 
 
 def test_get_logger():
+    """Test get_logger"""
     log_name = "test_get_logger"
     logger = cdislogging.get_logger(log_name)
     assert logger.name == log_name
@@ -62,6 +59,7 @@ log_levels = [
 
 @pytest.mark.parametrize("given,expected", log_levels)
 def test_get_logger_log_levels(given, expected):
+    """Test get_logger_log_levels"""
     logger = cdislogging.get_logger(
         "test_get_logger_log_levels" + given, log_level=given
     )
@@ -69,6 +67,7 @@ def test_get_logger_log_levels(given, expected):
 
 
 def test_multiple_log_handlers():
+    """Test multiple log handlers"""
     logger = cdislogging.get_logger("one_handler", log_level="debug")
     assert len(logger.handlers) == 1
 
@@ -84,7 +83,7 @@ def test_instantiate_with_log_level():
     """
     logger = cdislogging.get_logger("logger", log_level="info")
     assert logger.level == logging.INFO
-    assert logger.propagate == False
+    assert logger.propagate is False
     assert len(logger.handlers) == 1
 
 
@@ -95,7 +94,7 @@ def test_instantiate_without_log_level():
     """
     logger = cdislogging.get_logger("logger")
     assert logger.level == logging.NOTSET
-    assert logger.propagate == True
+    assert logger.propagate is True
     assert len(logger.handlers) == 0
 
 
@@ -173,15 +172,14 @@ def test_child_change_level_from_notset_updates_properties():
     the child logger correctly updates level and propagate,
     and gets its own handler
     """
-    parent = cdislogging.get_logger("parent", log_level="info")
     child = cdislogging.get_logger("parent.child")
-    assert child.propagate == True
+    assert child.propagate is True
     assert len(child.handlers) == 0
 
     # TODO: should really rename this to get_or_update_logger...
     cdislogging.get_logger("parent.child", log_level="warn")
 
-    assert child.propagate == False
+    assert child.propagate is False
     assert len(child.handlers) == 1
 
 
@@ -202,7 +200,9 @@ def test_child_change_level_from_notset_logs_own_level():
     mock_child_hdlr_emit = MagicMock()
     child.handlers[0].emit = mock_child_hdlr_emit
 
-    child.warn("Should emit with child hdlr only; child no longer inherits/propagates")
+    child.warning(
+        "Should emit with child hdlr only; child no longer inherits/propagates"
+    )
     assert mock_parent_hdlr_emit.call_count == 0
     assert mock_child_hdlr_emit.call_count == 1
 
@@ -211,39 +211,15 @@ def test_child_change_level_from_notset_logs_own_level():
     assert mock_child_hdlr_emit.call_count == 1
 
 
-def test_reset_to_notset():
-    """
-    Check that if logger was instantiated with log_level != NOTSET
-    and then get_logger() is called on it again with log_level='notset',
-    the logger's log level is correctly reset to NOTSET
-    and the logger logs at the correct level
-    """
-    parent = cdislogging.get_logger("parent", log_level="debug")
-    mock_parent_hdlr_emit = MagicMock()
-    parent.handlers[0].emit = mock_parent_hdlr_emit
-
-    child = cdislogging.get_logger("parent.child", log_level="info")
-    mock_child_hdlr_emit = MagicMock()
-    child.handlers[0].emit = mock_child_hdlr_emit
-
-    child = cdislogging.get_logger("parent.child", log_level="notset")
-    assert child.propagate == True
-    assert len(child.handlers) == 0
-
-    child.info("Should emit with parent hdlr only")
-    assert mock_parent_hdlr_emit.call_count == 1
-    assert mock_child_hdlr_emit.call_count == 0
-
-    child.debug("Should emit with parent hdlr only")
-    assert mock_parent_hdlr_emit.call_count == 2
-    assert mock_child_hdlr_emit.call_count == 0
-
-
-def test_no_unintentional_reset_to_notset():
+def test_no_reset_and_reset_to_notset():
     """
     Check that if logger was instantiated with log_level != NOTSET
     and then get_logger() is called on it again without a log_level arg,
     the logger's log level does _not_ get reset to NOTSET
+
+    Then check if get_logger() is called on it again with log_level='notset',
+    the logger's log level is correctly reset to NOTSET
+    and the logger logs at the correct level
     """
     parent = cdislogging.get_logger("parent", log_level="debug")
     mock_parent_hdlr_emit = MagicMock()
@@ -257,10 +233,26 @@ def test_no_unintentional_reset_to_notset():
     assert mock_parent_hdlr_emit.call_count == 0
     assert mock_child_hdlr_emit.call_count == 1
 
+    # get_logger() is called on it again without a log_level arg,
     child = cdislogging.get_logger("parent.child")
     child.debug(
         "Should not emit, but will emit on parent hdlr if child level was reset to NOTSET"
     )
-
+    # the logger's log level does _not_ get reset to NOTSET
     assert mock_parent_hdlr_emit.call_count == 0
+    assert mock_child_hdlr_emit.call_count == 1
+
+    # get_logger() is called on it again with log_level='notset',
+    child = cdislogging.get_logger("parent.child", log_level="notset")
+    assert child.propagate is True
+    assert len(child.handlers) == 0
+
+    # the logger's log level is correctly reset to NOTSET
+    # and the logger logs at the correct level (ie, parent)
+    child.info("Should emit with parent hdlr only")
+    assert mock_parent_hdlr_emit.call_count == 1
+    assert mock_child_hdlr_emit.call_count == 1
+
+    child.debug("Should emit with parent hdlr only")
+    assert mock_parent_hdlr_emit.call_count == 2
     assert mock_child_hdlr_emit.call_count == 1

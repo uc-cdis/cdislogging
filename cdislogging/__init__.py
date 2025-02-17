@@ -6,7 +6,6 @@ Logging with a standardized format
 import logging
 import sys
 
-
 FORMAT = "[%(asctime)s][%(name)10s][%(levelname)7s] %(message)s"
 
 
@@ -25,7 +24,7 @@ def get_stream_handler(format=FORMAT):
     return handler
 
 
-def get_file_handler(file_name, format=FORMAT):
+def get_file_handler(file_name: str, format=FORMAT):
     """Return a file handler
 
     Args:
@@ -85,9 +84,8 @@ def get_logger(logger_name, file_name=None, log_level=None, format=FORMAT):
     if log_level:
         if log_level not in log_levels:
             error_message = (
-                "Invalid log_level parameter: {}\n\n"
-                "Valid options: debug, info, warning, "
-                "warn, error".format(log_level)
+                f"Invalid log_level parameter: {log_level}\n\n"
+                "Valid options: debug, info, warn, warning, error"
             )
             raise Exception(error_message)
 

@@ -1,8 +1,9 @@
 # cdislogging
+
 Logging routines to centralize format
 
-Basic usage:
----
+## Basic usage
+
 
 In the parent/root module:
 ```python
@@ -11,7 +12,9 @@ from cdislogging import get_logger
 logger = get_logger('__name__', log_level='info')
 logger.info('Hello world!')
 ```
+
 In a child module:
+
 ```python
 from cdislogging import get_logger
 
@@ -28,8 +31,7 @@ The default `log_level` argument in `get_logger` is `NONE`, which means the defa
 
 See more about Python logging [here](https://docs.python.org/3/library/logging.html).
 
-Optional parameters:
----
+### Optional parameters
 
 * file_name (default: None) - If present, the logger will output logs to a file as well as stdout
 * log_level (default: 'debug') - Change the log level
