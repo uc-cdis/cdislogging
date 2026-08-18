@@ -1,17 +1,27 @@
-[tool.poetry]
-name = "cdislogging"
-version = "1.2.0"
-description = "Standardized logging tool and format for CTDS applications"
-authors = ["CTDS UChicago <cdis@uchicago.edu>"]
+[project]
+name = "gen3logging"
+version = "2.0.0"
+description = "Standardized logging tool and format for Gen3"
+authors = [{ name = "CTDS UChicago", email = "cdis@uchicago.edu" }]
 license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+readme = "README.md"
+requires-python = ">=3.13,<4"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Logging",
+]
+dependencies = []
 
-[tool.poetry.dependencies]
-python = ">=3.13,<4"
+[project.urls]
+Homepage = "https://github.com/uc-cdis/gen3logging"
+Repository = "https://github.com/uc-cdis/gen3logging"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 deptry = "*"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=2.0"]
+build-backend = "poetry.core.masonry.api"
