@@ -31,6 +31,16 @@ def clear_json_logs_env(monkeypatch):
     monkeypatch.delenv(gen3logging.JSON_LOGS_ENV_VAR, raising=False)
 
 
+@pytest.fixture(autouse=True)
+def restore_root_logger():
+    """Undo root logger changes, which delete_loggers cannot reach."""
+    root = logging.getLogger()
+    level, handlers = root.level, root.handlers[:]
+    yield
+    root.handlers[:] = handlers
+    root.setLevel(level)
+
+
 def make_record(**overrides):
     """Build a LogRecord carrying only the attributes a test cares about."""
     attrs = {
@@ -297,6 +307,23 @@ def test_json_logs_ignores_format_argument():
     handler = gen3logging.get_stream_handler(format=gen3logging.FORMAT, json_logs=True)
 
     assert isinstance(handler.formatter, gen3logging.JsonFormatter)
+
+
+@pytest.mark.parametrize("name", [None, ""])
+def test_falsy_name_returns_the_root_logger(name):
+    """None and the empty string both configure the root logger."""
+    assert gen3logging.get_logger(name, log_level="info") is logging.getLogger()
+
+
+def test_root_logger_gets_a_handler_when_it_has_none(capsys):
+    """A root logger with no handlers yet gets one and emits through it."""
+    # pytest's logging plugin attaches its own root handlers, which would
+    # otherwise trip the "already instantiated" guard and skip ours.
+    logging.getLogger().handlers.clear()
+
+    gen3logging.get_logger(None, log_level="info").info("from root")
+
+    assert capsys.readouterr().out.strip().endswith("from root")
 
 
 def test_get_logger():

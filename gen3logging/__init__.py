@@ -7,7 +7,6 @@ import logging
 import os
 import sys
 import time
-from typing import Optional
 
 FORMAT = "[%(asctime)s][%(name)10s][%(levelname)7s] %(message)s"
 
@@ -55,8 +54,10 @@ class JsonFormatter(logging.Formatter):
     """
 
     # gmtime pairs with the trailing Z in default_msec_format; localtime would
-    # label local times as UTC.
-    converter = time.gmtime
+    # label local times as UTC. staticmethod keeps a bare function from being
+    # treated as a method here, which type checkers reject as an invalid
+    # override of Formatter.converter.
+    converter = staticmethod(time.gmtime)
     default_time_format = "%Y-%m-%dT%H:%M:%S"
     default_msec_format = "%s.%03dZ"
 
@@ -89,7 +90,7 @@ class JsonFormatter(logging.Formatter):
 
 
 def get_stream_handler(
-    format: Optional[str] = None, json_logs: Optional[bool] = None
+    format: str | None = None, json_logs: bool | None = None
 ) -> logging.StreamHandler:
     """
     Return a stdout stream handler
@@ -97,9 +98,9 @@ def get_stream_handler(
     All logs will write to stdout.
 
     Args:
-        format (Optional[str]): %-style format string. Defaults to
+        format (str | None): %-style format string. Defaults to
                                 FORMAT. Ignored when JSON is enabled.
-        json_logs (Optional[bool]): emit JSON instead of text. When None, falls
+        json_logs (bool | None): emit JSON instead of text. When None, falls
                                     back to the GEN3_JSON_LOGS env var.
 
     Returns:
@@ -113,16 +114,16 @@ def get_stream_handler(
 
 
 def get_file_handler(
-    file_name: str, format: Optional[str] = None, json_logs: Optional[bool] = None
+    file_name: str, format: str | None = None, json_logs: bool | None = None
 ) -> logging.FileHandler:
     """
     Return a file handler
 
     Args:
         file_name (str): name of file to write logs to
-        format (Optional[str]): %-style format string. Defaults to
+        format (str | None): %-style format string. Defaults to
                                 FORMAT. Ignored when JSON is enabled.
-        json_logs (Optional[bool]): emit JSON instead of text. When None, falls
+        json_logs (bool | None): emit JSON instead of text. When None, falls
                                     back to the GEN3_JSON_LOGS env var.
 
     Returns:
@@ -136,11 +137,11 @@ def get_file_handler(
 
 
 def get_logger(
-    logger_name: str,
-    file_name: Optional[str] = None,
-    log_level: Optional[str] = None,
-    format: Optional[str] = None,
-    json_logs: Optional[bool] = None,
+    logger_name: str | None,
+    file_name: str | None = None,
+    log_level: str | None = None,
+    format: str | None = None,
+    json_logs: bool | None = None,
 ) -> logging.Logger:
     """
     Return an opinionated basic logger named `name` that logs to stdout
@@ -163,13 +164,13 @@ def get_logger(
     ```
 
     Args:
-        logger_name (str): name of the logger
-        file_name (Optional[str]): if present, will write logs to file as well
-        log_level (Optional[str]): level of logging for this logger. string so you
+        logger_name (str | None): name of the logger, or None for the root logger
+        file_name (str | None): if present, will write logs to file as well
+        log_level (str | None): level of logging for this logger. string so you
                                    don't have to import logging in the application
-        format (Optional[str]): %-style format string. Defaults to
+        format (str | None): %-style format string. Defaults to
                                 FORMAT. Ignored when JSON is enabled.
-        json_logs (Optional[bool]): emit JSON instead of text. When None, falls
+        json_logs (bool | None): emit JSON instead of text. When None, falls
                                     back to the GEN3_JSON_LOGS env var.
 
     Returns:
@@ -222,15 +223,13 @@ def get_logger(
     return logger
 
 
-def _get_formatter(
-    format: Optional[str], json_logs: Optional[bool]
-) -> logging.Formatter:
+def _get_formatter(format: str | None, json_logs: bool | None) -> logging.Formatter:
     """
     Return the formatter for a format and JSON selection.
 
     Args:
-        format (Optional[str]): %-style format string, or None for FORMAT.
-        json_logs (Optional[bool]): whether to emit JSON. None defers to the
+        format (str | None): %-style format string, or None for FORMAT.
+        json_logs (bool | None): whether to emit JSON. None defers to the
                                     GEN3_JSON_LOGS env var.
 
     Returns:
@@ -297,7 +296,7 @@ def _otel_fields(record: logging.LogRecord) -> dict:
     return {label: _otel_value(record, attribute) for label, attribute in _OTEL_FIELDS}
 
 
-def _otel_value(record: logging.LogRecord, attribute: str) -> Optional[str]:
+def _otel_value(record: logging.LogRecord, attribute: str) -> str | None:
     """
     Read one OpenTelemetry attribute, normalizing "no trace" to None.
 
@@ -306,7 +305,7 @@ def _otel_value(record: logging.LogRecord, attribute: str) -> Optional[str]:
         attribute (str): name of the record attribute holding the value.
 
     Returns:
-        Optional[str]: the value, or None when no trace was recording.
+        str | None: the value, or None when no trace was recording.
     """
 
     value = getattr(record, attribute, None)

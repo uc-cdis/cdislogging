@@ -63,7 +63,6 @@ up, and nothing fails when they are missing.
 
 `trace_id` and `span_id` are either a usable id or absent.
 
-
 Any `%`-style format string can replace the default:
 
 ```python
@@ -117,3 +116,5 @@ supersedes any `format` string.
 
 That is the whole migration. Output is identical to `cdislogging` 1.2.0
 until you enable JSON or instrument with OpenTelemetry.
+
+> NOTE: The library also now contains a PEP 561 py.typed marker, which tells type checkers to enforce our typing.
