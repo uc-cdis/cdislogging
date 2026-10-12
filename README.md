@@ -39,6 +39,23 @@ The default `log_level` argument in `get_logger` is `None`, which means the defa
 
 See more about Python logging [here](https://docs.python.org/3/library/logging.html).
 
+## Parameters
+
+---
+
+`get_logger` takes:
+
+* `logger_name` - name of the logger, or `None` for the root logger
+* `file_name` (default: `None`) - if present, the logger will output logs to a file as well as stdout
+* `log_level` (default: `None`) - one of `notset`, `debug`, `info`, `warning`, `warn`, `error`, `critical`, in any case. Anything else raises `ValueError`
+* `format` (default: `None`, meaning the format below) - `%`-style format string for text output
+* `json_logs` (default: `None`, meaning the `GEN3_JSON_LOGS` env var decides) - emit JSON instead of text
+
+`file_name`, `format` and `json_logs` only apply when a logger first gets its
+handlers, on the first call that sets a level other than `notset`. Calling
+`get_logger` again for the same logger keeps its existing handlers, so set
+`GEN3_JSON_LOGS` to switch a whole service to JSON regardless of call order.
+
 ## Output format
 
 ---
@@ -56,7 +73,8 @@ When OpenTelemetry is active, trace context is appended automatically:
 ```
 
 The suffix carries only the fields that are available, and is absent entirely
-when none are. `gen3logging` does not depend on OpenTelemetry: populate these by
+when none are. It follows the message, ahead of any traceback or stack.
+`gen3logging` does not depend on OpenTelemetry: populate these by
 installing `opentelemetry-instrumentation-logging` and calling
 `LoggingInstrumentor().instrument()`. Nothing needs to change here to pick them
 up, and nothing fails when they are missing.
@@ -91,6 +109,9 @@ logger = get_logger("gen3foo", log_level='info', json_logs=True)
 | `message`                        | the formatted message, with `%`-style arguments interpolated      |
 | `trace_id`, `span_id`, `service` | OpenTelemetry correlation, `null` when unavailable                |
 | `exception`                      | traceback text, present only on records that carry exception info |
+| `stack_info`                     | stack text, present only on records logged with `stack_info=True` |
+
+Fields passed through a logging call's `extra=` are not included.
 
 Because the message and traceback are JSON-escaped, a multi-line traceback stays
 on a single log line and can be parsed by a log aggregator without stitching.

@@ -13,6 +13,14 @@ repos:
     -   id: no-commit-to-branch
         args: [--branch, develop, --branch, master, --branch, main, --pattern, release/.*]
 -   repo: https://github.com/psf/black
-    rev: 26.5.1
+    rev: 26.10.1
     hooks:
     -   id: black
+-   repo: local
+    hooks:
+    -   id: ty
+        name: ty
+        entry: poetry run ty check
+        language: system
+        types: [python]
+        pass_filenames: false

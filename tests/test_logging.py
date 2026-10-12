@@ -55,17 +55,20 @@ def make_record(**overrides):
 
 def test_get_stream_handler():
     """A stream handler uses the requested plain-text format."""
-    handler = gen3logging.get_stream_handler(format=gen3logging.FORMAT)
-    assert handler.formatter._fmt == gen3logging.FORMAT
+    handler = gen3logging.get_stream_handler(format="%(levelname)s|%(message)s")
+    assert handler.format(make_record()) == "INFO|hello world"
 
 
 def test_get_file_handler(tmp_path):
     """A file handler opens the named file and uses the requested format."""
     file_name = str(tmp_path / "FAKE-LOGGER.TXT")
-    handler = gen3logging.get_file_handler(file_name, format=gen3logging.FORMAT)
+    handler = gen3logging.get_file_handler(
+        file_name, format="%(levelname)s|%(message)s"
+    )
 
     try:
-        assert handler.formatter._fmt == gen3logging.FORMAT
+        assert handler.format(make_record()) == "INFO|hello world"
+        assert handler.stream is not None
         assert handler.stream.name == file_name
         assert os.path.exists(file_name)
     finally:
@@ -188,6 +191,14 @@ def test_json_output_omits_exception_when_absent():
     assert "exception" not in parsed
 
 
+def test_json_output_includes_stack_info():
+    """A record logged with stack_info gains a stack_info field."""
+    record = make_record(stack_info="Stack (most recent call last):\n  fake frame")
+
+    parsed = json.loads(gen3logging.JsonFormatter().format(record))
+    assert "fake frame" in parsed["stack_info"]
+
+
 def test_default_output_matches_a_plain_legacy_formatter():
     """Default text output is what logging.Formatter(FORMAT) produces."""
     record = make_record()
@@ -239,19 +250,23 @@ def test_text_output_omits_unavailable_trace_fields():
     assert output.endswith(" [service=fence]")
 
 
-def test_text_output_survives_absent_otel_attributes():
-    """Formatting a record with no OpenTelemetry attributes does not raise."""
-    record = make_record()
-
-    assert "hello world" in gen3logging.TextFormatter(gen3logging.FORMAT).format(record)
-
-
 def test_custom_format_also_gets_trace_suffix():
     """A caller-supplied format string still receives the trace suffix."""
     record = make_record(otelServiceName="fence")
 
     output = gen3logging.TextFormatter("%(levelname)s|%(message)s").format(record)
     assert output == "INFO|hello world [service=fence]"
+
+
+def test_trace_suffix_precedes_the_traceback():
+    """The trace suffix ends the message line, ahead of the traceback."""
+    try:
+        raise ValueError("boom")
+    except ValueError:
+        record = make_record(exc_info=sys.exc_info(), otelServiceName="fence")
+
+    output = gen3logging.TextFormatter(gen3logging.FORMAT).format(record)
+    assert output.splitlines()[0].endswith("hello world [service=fence]")
 
 
 def test_json_logs_kwarg_enables_json(capsys):
@@ -326,6 +341,40 @@ def test_root_logger_gets_a_handler_when_it_has_none(capsys):
     assert capsys.readouterr().out.strip().endswith("from root")
 
 
+def test_json_logs_kwarg_applies_to_the_file_handler(tmp_path):
+    """json_logs=True also switches the file handler to JSON."""
+    file_name = str(tmp_path / "log.json")
+    logger = gen3logging.get_logger(
+        "json_file", file_name=file_name, log_level="info", json_logs=True
+    )
+
+    logger.info("to file")
+    for handler in logger.handlers:
+        handler.close()
+
+    with open(file_name) as f:
+        assert json.loads(f.read())["message"] == "to file"
+
+
+def test_json_logs_ignored_once_a_logger_has_handlers(capsys):
+    """A later get_logger call keeps the handlers from the first, text included."""
+    gen3logging.get_logger("already_text", log_level="info")
+
+    gen3logging.get_logger("already_text", log_level="info", json_logs=True).info(
+        "still text"
+    )
+
+    output = capsys.readouterr().out.strip()
+    with pytest.raises(json.JSONDecodeError):
+        json.loads(output)
+
+
+def test_invalid_log_level_raises_value_error():
+    """An unrecognized log_level raises ValueError."""
+    with pytest.raises(ValueError):
+        gen3logging.get_logger("bad_level", log_level="loud")
+
+
 def test_get_logger():
     log_name = "test_get_logger"
     logger = gen3logging.get_logger(log_name)
@@ -338,6 +387,9 @@ log_levels = [
     ("warning", logging.WARNING),
     ("warn", logging.WARNING),
     ("error", logging.ERROR),
+    ("critical", logging.CRITICAL),
+    ("DEBUG", logging.DEBUG),
+    ("Warning", logging.WARNING),
 ]
 
 

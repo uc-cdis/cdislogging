@@ -21,6 +21,7 @@ Repository = "https://github.com/uc-cdis/gen3logging"
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 deptry = "*"
+ty = "*"
 
 [build-system]
 requires = ["poetry-core>=2.0"]
