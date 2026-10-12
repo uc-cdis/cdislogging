@@ -31,6 +31,12 @@ wheels/
 *.manifest
 *.spec
 
+# AI
+.serena/
+.claude/
+AGENTS.md
+CLAUDE.md
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
