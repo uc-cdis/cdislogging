@@ -236,7 +236,8 @@ def get_logger(
         if level is None:
             raise ValueError(
                 f"Invalid log_level parameter: {log_level}. "
-                f"Valid options: {', '.join(_LOG_LEVELS)}"
+                f"Expected one of these strings (case-insensitive): {', '.join(_LOG_LEVELS)}"
+                f"(e.g. log_level='info' instead of logging.INFO)."
             )
 
         logger.setLevel(level)
