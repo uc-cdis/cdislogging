@@ -230,7 +230,9 @@ def get_logger(
 
     if log_level:
         # notset maps to 0, so a falsiness check would reject it
-        level = _LOG_LEVELS.get(log_level.lower())
+        level = (
+            _LOG_LEVELS.get(log_level.lower()) if isinstance(log_level, str) else None
+        )
         if level is None:
             raise ValueError(
                 f"Invalid log_level parameter: {log_level}. "

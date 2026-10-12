@@ -369,10 +369,11 @@ def test_json_logs_ignored_once_a_logger_has_handlers(capsys):
         json.loads(output)
 
 
-def test_invalid_log_level_raises_value_error():
-    """An unrecognized log_level raises ValueError."""
+@pytest.mark.parametrize("log_level", ["loud", logging.INFO])
+def test_invalid_log_level_raises_value_error(log_level):
+    """An unrecognized or non-string log_level raises ValueError."""
     with pytest.raises(ValueError):
-        gen3logging.get_logger("bad_level", log_level="loud")
+        gen3logging.get_logger("bad_level", log_level=log_level)
 
 
 def test_get_logger():
